@@ -105,9 +105,13 @@ canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
 .intro-icon{font-size:5rem;display:block;margin-bottom:.6rem;animation:busFloat 2.5s ease-in-out infinite}
 .intro-name{font-size:2rem;font-weight:900;margin-bottom:.3rem}
 .intro-desc{color:var(--text2);font-size:.95rem;margin-bottom:1.6rem}
-.video-box{position:relative;width:100%;padding-top:56.25%;border-radius:var(--r);overflow:hidden;margin-bottom:1.4rem;background:#000}
+.video-box{position:relative;width:100%;padding-top:56.25%;border-radius:var(--r);overflow:hidden;background:#000}
 .video-box iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .no-vid{background:var(--bg2);border-radius:var(--r);padding:2.5rem 1rem;color:var(--text2);font-size:.9rem;margin-bottom:1.4rem}
+.vid-nav{display:flex;align-items:center;justify-content:space-between;margin:.6rem 0 1.2rem;gap:.5rem}
+.vid-nav-btn{background:rgba(255,255,255,.1);border:none;color:var(--text);border-radius:50%;width:34px;height:34px;font-size:1rem;cursor:pointer;flex-shrink:0}
+.vid-nav-btn:disabled{opacity:.25;cursor:default}
+.vid-counter{font-size:.78rem;color:var(--text2)}
 .intro-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
 .btn-start{padding:.9rem 2.2rem;border-radius:100px;border:none;background:linear-gradient(135deg,#f97316,#a855f7);color:#fff;font-size:1rem;font-weight:800;cursor:pointer}
 .btn-back2{padding:.9rem 1.6rem;border-radius:100px;border:none;background:var(--bg3);color:var(--text);font-size:1rem;font-weight:700;cursor:pointer}
@@ -495,11 +499,21 @@ function startTopic(id){
   const va=document.getElementById('video-area');
   const vids=currentTopic.vids||[];
   if(vids.length){
-    va.innerHTML=vids.map((v,i)=>`
-      ${vids.length>1?`<p style="font-size:.78rem;color:var(--text2);margin-bottom:.4rem">📹 영상 ${i+1}</p>`:''}
-      <div class="video-box" style="margin-bottom:1rem"><iframe src="https://www.youtube.com/embed/${v}?rel=0&modestbranding=1&controls=1" title="Science Video" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>
-      <p style="font-size:.7rem;color:var(--text2);text-align:center;margin-bottom:.8rem">* 유튜브 정책에 따라 일부 영상은 퍼가기가 제한될 수 있습니다.</p>
-    `).join('');
+    let vi=0;
+    function renderVid(){
+      va.innerHTML=`
+        <div class="video-box"><iframe src="https://www.youtube.com/embed/${vids[vi]}?rel=0&modestbranding=1&controls=1" title="Science Video" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>
+        <div class="vid-nav">
+          <button class="vid-nav-btn" onclick="vidPrev()" ${vi===0?'disabled':''}>‹</button>
+          <span class="vid-counter">📹 영상 ${vi+1} / ${vids.length}</span>
+          <button class="vid-nav-btn" onclick="vidNext()" ${vi===vids.length-1?'disabled':''}>›</button>
+        </div>
+        <p style="font-size:.68rem;color:var(--text2);text-align:center;margin-bottom:.8rem">* 일부 영상은 업로더 설정으로 재생이 제한될 수 있습니다.</p>
+      `;
+    }
+    window.vidPrev=()=>{if(vi>0){vi--;renderVid();}};
+    window.vidNext=()=>{if(vi<vids.length-1){vi++;renderVid();}};
+    renderVid();
   } else {
     va.innerHTML='<div class="no-vid">📹 이 주제는 곧 영상이 추가될 예정이에요!</div>';
   }
