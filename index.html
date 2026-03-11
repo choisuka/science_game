@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>과학탐험대 🚌</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0e1a;--bg2:#111827;--bg3:#1f2937;
+  --text:#f1f5f9;--text2:#94a3b8;
+  --r:16px;
+}
+html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Apple SD Gothic Neo',sans-serif;min-height:100%;overflow-x:hidden}
+
+/* ── 별 배경 ── */
+canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ── 공통 ── */
+.wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:0 1.2rem 4rem}
+.hidden{display:none!important}
+
+/* ── 홈 화면 ── */
+#home{text-align:center;padding-top:3.5rem}
+.bus-emoji{font-size:5rem;display:block;animation:busFloat 2.5s ease-in-out infinite}
+@keyframes busFloat{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-14px) rotate(3deg)}}
+#home h1{font-size:clamp(2rem,5vw,3rem);font-weight:900;margin:.8rem 0 .4rem;
+  background:linear-gradient(135deg,#f97316,#eab308,#22c55e,#3b82f6,#a855f7);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+#home .sub{color:var(--text2);font-size:1rem;margin-bottom:2.5rem}
+.topic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin-top:1.5rem;text-align:left}
+.topic-card{
+  background:var(--bg2);border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--r);padding:1.4rem 1.2rem;cursor:pointer;
+  transition:transform .2s,box-shadow .2s,border-color .2s;
+  position:relative;overflow:hidden;
+}
+.topic-card:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,.5)}
+.topic-card:hover{border-color:var(--tc)}
+.topic-icon{font-size:2.6rem;display:block;margin-bottom:.6rem}
+.topic-card h3{font-size:1.05rem;font-weight:800;margin-bottom:.3rem}
+.topic-card p{font-size:.78rem;color:var(--text2);line-height:1.6}
+.topic-badge{
+  position:absolute;top:.8rem;right:.8rem;
+  font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:20px;
+  background:rgba(255,255,255,.08);color:var(--text2)
+}
+.topic-card.done .topic-badge{background:rgba(34,197,94,.2);color:#4ade80}
+
+/* ── 퀴즈 화면 ── */
+#quiz{padding-top:2rem}
+.quiz-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.8rem}
+.back-btn{background:rgba(255,255,255,.07);border:none;border-radius:50%;width:40px;height:40px;
+  font-size:1.1rem;cursor:pointer;color:var(--text);transition:background .2s;flex-shrink:0}
+.back-btn:hover{background:rgba(255,255,255,.14)}
+.quiz-topic{font-weight:800;font-size:1.1rem}
+.progress-bar{height:6px;background:rgba(255,255,255,.08);border-radius:3px;flex:1}
+.progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#f97316,#a855f7);transition:width .4s}
+.q-num{font-size:.8rem;color:var(--text2);white-space:nowrap}
+
+.scene-box{
+  background:var(--bg2);border-radius:var(--r);padding:1.6rem 1.4rem;
+  margin-bottom:1.4rem;border:1px solid rgba(255,255,255,.07);
+}
+.scene-icon{font-size:3.5rem;text-align:center;display:block;margin-bottom:.8rem;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.scene-text{font-size:.9rem;color:var(--text2);line-height:1.8;text-align:center}
+.scene-text strong{color:var(--text)}
+
+.question{font-size:1.15rem;font-weight:700;line-height:1.6;margin-bottom:1.2rem;text-align:center}
+
+.choices{display:grid;gap:.75rem}
+.choice{
+  background:var(--bg3);border:1.5px solid rgba(255,255,255,.08);
+  border-radius:12px;padding:1rem 1.2rem;cursor:pointer;font-size:.95rem;
+  text-align:left;color:var(--text);transition:border-color .15s,background .15s;
+  display:flex;align-items:center;gap:.75rem;
+}
+.choice:hover:not(.disabled){background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.2)}
+.choice.correct{background:rgba(34,197,94,.12);border-color:#22c55e;color:#4ade80}
+.choice.wrong{background:rgba(239,68,68,.12);border-color:#ef4444;color:#f87171}
+.choice.disabled{cursor:default}
+.choice-letter{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0}
+.choice.correct .choice-letter{background:rgba(34,197,94,.3)}
+.choice.wrong .choice-letter{background:rgba(239,68,68,.3)}
+
+.fact-box{
+  background:rgba(234,179,8,.07);border:1px solid rgba(234,179,8,.25);
+  border-radius:12px;padding:1rem 1.2rem;margin-top:1.2rem;
+  font-size:.88rem;line-height:1.8;color:var(--text2);
+  animation:fadeIn .4s ease
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fact-box strong{color:#fbbf24}
+.next-btn{
+  width:100%;margin-top:1.2rem;padding:1rem;border-radius:12px;border:none;
+  background:linear-gradient(135deg,#f97316,#a855f7);color:#fff;
+  font-size:1rem;font-weight:800;cursor:pointer;transition:opacity .2s
+}
+.next-btn:hover{opacity:.87}
+
+/* ── 결과 화면 ── */
+#result{text-align:center;padding-top:3rem}
+.result-icon{font-size:5rem;display:block;margin-bottom:1rem;animation:spin .5s ease}
+@keyframes spin{from{transform:rotate(-20deg) scale(.8)}to{transform:rotate(0) scale(1)}}
+#result h2{font-size:2rem;font-weight:900;margin-bottom:.5rem}
+.stars{font-size:2.5rem;letter-spacing:.2rem;margin:1rem 0}
+.score-txt{color:var(--text2);font-size:1rem;margin-bottom:2rem}
+.result-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.result-btn{padding:.75rem 1.8rem;border-radius:100px;border:none;font-size:.95rem;font-weight:700;cursor:pointer}
+.btn-retry{background:var(--bg3);color:var(--text)}
+.btn-home{background:linear-gradient(135deg,#f97316,#a855f7);color:#fff}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<!-- ── 홈 ── -->
+<div class="wrap" id="home">
+  <span class="bus-emoji">🚌</span>
+  <h1>과학탐험대</h1>
+  <p class="sub">매직스쿨버스를 타고 떠나는 신비한 과학 여행!<br>10가지 주제, 주제마다 5문제 도전!</p>
+  <div class="topic-grid" id="topic-grid"></div>
+</div>
+
+<!-- ── 퀴즈 ── -->
+<div class="wrap hidden" id="quiz">
+  <div class="quiz-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <span class="quiz-topic" id="quiz-topic-name"></span>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <span class="q-num" id="q-num"></span>
+  </div>
+  <div class="scene-box">
+    <span class="scene-icon" id="scene-icon"></span>
+    <p class="scene-text" id="scene-text"></p>
+  </div>
+  <p class="question" id="question-text"></p>
+  <div class="choices" id="choices"></div>
+  <div class="fact-box hidden" id="fact-box"></div>
+  <button class="next-btn hidden" id="next-btn" onclick="nextQ()">다음 →</button>
+</div>
+
+<!-- ── 결과 ── -->
+<div class="wrap hidden" id="result">
+  <span class="result-icon" id="result-icon"></span>
+  <h2 id="result-title"></h2>
+  <div class="stars" id="result-stars"></div>
+  <p class="score-txt" id="result-score"></p>
+  <div class="result-btns">
+    <button class="result-btn btn-retry" onclick="retryTopic()">다시 도전 🔄</button>
+    <button class="result-btn btn-home" onclick="goHome()">다른 주제 탐험 🚌</button>
+  </div>
+</div>
+
+<script>
+// ── 별 배경 ──
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+let W,H,stars=[];
+function resizeCanvas(){W=cv.width=innerWidth;H=cv.height=innerHeight;stars=Array.from({length:120},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.4+.3,a:Math.random()}))}
+function drawStars(){ctx.clearRect(0,0,W,H);stars.forEach(s=>{ctx.globalAlpha=s.a;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill()});ctx.globalAlpha=1;requestAnimationFrame(drawStars)}
+window.addEventListener('resize',resizeCanvas);resizeCanvas();drawStars();
+
+// ── 주제 데이터 ──
+const TOPICS = [
+  {
+    id:'space', icon:'🚀', name:'우주 탐험', color:'#3b82f6',
+    desc:'태양계 · 별 · 블랙홀',
+    qs:[
+      {scene:'🌍',sceneText:'버스가 지구를 떠나 우주로 날아갑니다! 창밖으로 아름다운 지구가 점점 작아져요.',
+       q:'태양계에서 가장 큰 행성은 무엇인가요?',
+       choices:['지구','토성','목성','해왕성'],ans:2,
+       fact:'<strong>목성</strong>은 지구보다 약 1,300배 크고, 지구 11개를 옆으로 늘어놓아야 목성 지름이 됩니다! 목성의 대적점은 300년 넘게 계속되는 거대한 태풍이에요.'},
+      {scene:'☀️',sceneText:'태양에 가까이 다가갑니다. 온도계가 무섭게 올라가요! 선생님이 특수 방어막을 켭니다.',
+       q:'태양의 표면 온도는 약 몇 도인가요?',
+       choices:['100°C','1,000°C','6,000°C','1,000,000°C'],ans:2,
+       fact:'태양 표면은 약 <strong>6,000°C</strong>이지만, 태양 대기(코로나)는 놀랍게도 100만°C가 넘습니다! 왜 그런지는 아직도 과학자들이 연구 중이에요.'},
+      {scene:'🌙',sceneText:'달 위에 내렸어요! 발이 폭신폭신합니다. 지구가 저 멀리 보여요.',
+       q:'달이 지구 주위를 한 바퀴 도는 데 걸리는 시간은?',
+       choices:['7일','약 27일','365일','24시간'],ans:1,
+       fact:'달은 약 <strong>27.3일</strong>에 한 번 지구를 공전하고, 자전 주기도 같아서 우리는 항상 달의 같은 면만 볼 수 있어요! 달 뒷면을 본 인간은 아폴로 우주인들뿐이에요.'},
+      {scene:'⭐',sceneText:'밤하늘을 가득 채운 별들 사이로 날아갑니다. 별들이 반짝반짝 인사를 해요!',
+       q:'별이 반짝이는 이유는 무엇인가요?',
+       choices:['별이 깜빡이는 것','지구 대기가 빛을 흔드는 것','별이 회전하는 것','구름이 가리는 것'],ans:1,
+       fact:'별 자체는 안 깜빡입니다! 지구의 <strong>대기</strong>가 별빛을 굴절·산란시켜서 반짝이는 것처럼 보여요. 우주에서 보면 별이 전혀 반짝이지 않고 그냥 점처럼 보인답니다.'},
+      {scene:'🌌',sceneText:'은하수 한가운데입니다! 억만 개의 별들이 소용돌이치고 있어요.',
+       q:'우리 은하(밀키웨이)에는 별이 약 몇 개 있나요?',
+       choices:['1만 개','100만 개','10억 개','2,000억~4,000억 개'],ans:3,
+       fact:'우리 은하에는 무려 <strong>2,000억~4,000억 개</strong>의 별이 있어요! 그리고 우주에는 이런 은하가 또 수천억 개 있습니다. 우주는 상상 이상으로 크고 넓어요.'},
+    ]
+  },
+  {
+    id:'body', icon:'🫀', name:'인체의 비밀', color:'#ef4444',
+    desc:'심장 · 뼈 · 뇌',
+    qs:[
+      {scene:'❤️',sceneText:'버스가 작아져서 혈관 속으로 들어갑니다! 심장이 쿵쿵 뛰는 소리가 들려요.',
+       q:'사람의 심장은 하루에 약 몇 번 뛰나요?',
+       choices:['1,000번','10,000번','100,000번','1,000,000번'],ans:2,
+       fact:'심장은 하루에 약 <strong>10만 번</strong>, 1년에 약 3,600만 번 뜁니다! 평생으로 따지면 약 30억 번 이상 뛰는 거예요. 쉬지 않고 일하는 최강 근육이에요.'},
+      {scene:'🦴',sceneText:'뼈대 앞에 섰어요. 생각보다 정말 많은 뼈가 있네요!',
+       q:'어른의 몸에는 뼈가 몇 개 있나요?',
+       choices:['106개','206개','306개','506개'],ans:1,
+       fact:'어른 몸에는 <strong>206개</strong>의 뼈가 있지만, 아기 때는 약 270~300개예요! 자라면서 여러 뼈가 합쳐집니다. 뼈 중 가장 작은 뼈는 귀 안의 등골뼈(3mm)예요.'},
+      {scene:'🧠',sceneText:'뇌 안으로 들어왔어요! 번개처럼 신호가 오가고 있어요.',
+       q:'뇌의 무게는 체중의 약 몇 %이지만 산소는 몇 %를 소비하나요?',
+       choices:['2% 무게 / 20% 산소','5% 무게 / 5% 산소','10% 무게 / 10% 산소','1% 무게 / 50% 산소'],ans:0,
+       fact:'뇌는 체중의 겨우 <strong>2%</strong>지만 몸 전체 산소의 <strong>20%</strong>를 씁니다! 뇌의 신경세포(뉴런)는 약 860억 개이고, 신호 전달 속도는 시속 430km에 달해요.'},
+      {scene:'🩸',sceneText:'적혈구들이 산소를 싣고 달려갑니다! 우리 버스도 함께 달려요.',
+       q:'혈액의 색깔이 빨간 이유는?',
+       choices:['물이 빨갛기 때문에','헤모글로빈이 산소와 결합해서','음식 색소 때문에','심장이 빨갛기 때문에'],ans:1,
+       fact:'혈액이 빨간 이유는 적혈구 속 <strong>헤모글로빈</strong>이 철(Fe)을 포함하고 있고, 이 철이 산소와 결합하면 밝은 빨간색이 되기 때문이에요. 문어나 오징어의 혈액은 구리를 포함해 파란색이에요!'},
+      {scene:'🫁',sceneText:'폐 안으로 들어왔어요! 숨을 들이쉬자 폐가 풍선처럼 부풀어요.',
+       q:'사람이 하루에 숨 쉬는 횟수는 약?',
+       choices:['약 1,000번','약 5,000번','약 20,000번','약 100,000번'],ans:2,
+       fact:'하루에 약 <strong>2만 번</strong> 숨을 쉬며, 하루 약 11,000리터의 공기를 들이마셔요! 양쪽 폐를 펼치면 테니스 코트 면적과 비슷한 70~80㎡가 됩니다.'},
+    ]
+  },
+  {
+    id:'ocean', icon:'🌊', name:'바다 세계', color:'#0ea5e9',
+    desc:'심해 · 해양생물 · 물의 순환',
+    qs:[
+      {scene:'🐳',sceneText:'잠수함이 바다 깊이 내려갑니다. 빛이 점점 사라지고 이상한 생물들이 나타나요!',
+       q:'지구에서 가장 깊은 바다 지점은?',
+       choices:['마리아나 해구 (약 11km)','대서양 중앙 (약 5km)','인도양 (약 7km)','북극해 (약 5.4km)'],ans:0,
+       fact:'<strong>마리아나 해구</strong>의 챌린저 딥은 약 11,034m! 에베레스트산을 거꾸로 넣어도 1.6km 더 깊어요. 수압이 1,000기압이 넘는 극한 환경에서도 생물이 살고 있어요.'},
+      {scene:'🐙',sceneText:'문어가 인사를 해요! 문어가 색깔을 바꾸더니 투명해집니다.',
+       q:'문어의 특별한 능력이 아닌 것은?',
+       choices:['색깔 변환','먹물 분사','피부로 호흡','날아다니기'],ans:3,
+       fact:'문어는 색맹인데도 피부 색깔을 자유롭게 바꾸고, 먹물로 천적을 혼란시키고, 피부로도 호흡합니다! 심장이 3개이고, 피는 파랑색이에요. <strong>날아다니는 것</strong>은 문어 능력이 아니랍니다.'},
+      {scene:'💧',sceneText:'물이 어떻게 여행하는지 보여드릴게요! 바다에서 하늘로 올라가는 물방울을 따라가 봐요.',
+       q:'물의 순환 과정을 순서대로 나열하면?',
+       choices:['증발→응결→강수→유출','강수→증발→응결→유출','응결→증발→강수→유출','유출→강수→증발→응결'],ans:0,
+       fact:'물은 <strong>증발(바다/강→수증기)→응결(수증기→구름)→강수(비·눈)→유출(강→바다)</strong> 순환을 반복해요! 지구의 물은 새로 만들어지거나 없어지지 않고 이 사이클을 수십억 년째 계속하고 있어요.'},
+      {scene:'🐠',sceneText:'산호초 마을에 도착했어요! 형형색색의 물고기들이 인사를 해요.',
+       q:'산호는 무엇인가요?',
+       choices:['돌의 일종','식물','동물','균류'],ans:2,
+       fact:'산호는 놀랍게도 <strong>동물</strong>이에요! 아주 작은 폴립이라는 동물들이 모여 형성합니다. 지구 바다의 25%의 해양생물이 산호초에 의존하며 살아가요. 바다의 열대우림이라 불립니다.'},
+      {scene:'🌡️',sceneText:'해수면 온도계가 올라가고 있어요. 선생님의 표정이 걱정스러워집니다.',
+       q:'바다가 지구 온난화에서 하는 역할은?',
+       choices:['온난화를 악화시킨다','CO₂와 열의 90%를 흡수한다','아무 역할이 없다','오존층을 파괴한다'],ans:1,
+       fact:'바다는 인간이 배출한 CO₂의 약 30%, 온난화 열의 무려 <strong>90% 이상</strong>을 흡수해 왔어요! 바다가 없었다면 지구는 이미 훨씬 더 뜨거웠을 거예요. 그래서 바다 보호가 중요합니다.'},
+    ]
+  },
+  {
+    id:'electricity', icon:'⚡', name:'전기 마법', color:'#eab308',
+    desc:'전류 · 회로 · 번개',
+    qs:[
+      {scene:'🔋',sceneText:'버스가 전지 안으로 들어갔어요! (+)극과 (-)극 사이에서 전자들이 달려가고 있어요.',
+       q:'전기 회로에서 전류의 방향은?',
+       choices:['(-)극에서 (+)극으로','(+)극에서 (-)극으로','양방향으로 동시에','전류는 방향이 없다'],ans:1,
+       fact:'전류는 관습적으로 <strong>(+)극에서 (-)극</strong>으로 흐른다고 합니다. 하지만 실제 전자는 반대 방향(-극에서 +극)으로 이동해요! 이 혼동은 18세기에 전기를 처음 정의할 때 생긴 오류예요.'},
+      {scene:'💡',sceneText:'전구가 켜졌어요! 필라멘트가 빨갛게 달궈지면서 빛이 납니다.',
+       q:'LED가 기존 전구보다 좋은 이유는?',
+       choices:['더 강한 빛','전기를 빛으로만 전환(열 낭비 적음)','더 저렴하다','더 크다'],ans:1,
+       fact:'일반 전구는 전기 에너지의 겨우 5~10%만 빛으로 바꾸고 나머지는 열로 낭비해요. 반면 <strong>LED</strong>는 80~90%를 빛으로 변환합니다! 그래서 전기도 덜 쓰고 오래 사용할 수 있어요.'},
+      {scene:'⛈️',sceneText:'번개가 치는 구름 속으로 들어갔어요! 얼음 알갱이들이 부딪히며 정전기가 쌓여요.',
+       q:'번개가 치는 과학적 원리는?',
+       choices:['구름이 마찰로 정전기가 생겨 방전','신이 화가 났을 때','구름 속 수소가 폭발','대기 중 산소 연소'],ans:0,
+       fact:'구름 속 얼음 알갱이들이 충돌하면서 <strong>정전기</strong>가 쌓입니다. 전압이 수억 볼트에 달하면 한순간에 방전(번개)이 일어나요! 번개의 온도는 태양 표면(6,000°C)의 4배인 약 30,000°C예요.'},
+      {scene:'🧲',sceneText:'거대한 자석 앞에 섰어요! 쇠붙이들이 자석에 달라붙고 있어요.',
+       q:'전기와 자기의 관계는?',
+       choices:['전혀 관계없다','전류가 흐르면 자기장이 생긴다','자기장이 있으면 전기가 사라진다','자기는 전기보다 강하다'],ans:1,
+       fact:'<strong>전류</strong>가 흐르면 주변에 자기장이 생기고, 반대로 자기장이 변하면 전류가 생깁니다! 이것을 전자기 유도라 해요. 발전소의 발전기, 전동기(모터) 모두 이 원리를 이용해요.'},
+      {scene:'☀️',sceneText:'태양광 발전소에 도착했어요! 태양 빛이 전기로 바뀌고 있어요.',
+       q:'태양광 패널이 전기를 만드는 원리는?',
+       choices:['태양열로 물을 끓여 터빈 돌리기','빛이 반도체를 때리면 전자 이동(광전효과)','거울로 빛을 모아 폭발','자석으로 발전'],ans:1,
+       fact:'태양광 패널은 <strong>광전효과</strong>를 이용해요. 빛(광자)이 실리콘 반도체를 때리면 전자가 튀어나와 전류가 흐릅니다. 아인슈타인이 이 광전효과를 설명해 노벨 물리학상을 받았어요!'},
+    ]
+  },
+  {
+    id:'dino', icon:'🦕', name:'공룡 시대', color:'#22c55e',
+    desc:'쥐라기 · 백악기 · 멸종',
+    qs:[
+      {scene:'🌿',sceneText:'버스가 시간을 거슬러 1억 년 전으로! 거대한 숲에서 공룡 발소리가 들려요.',
+       q:'지구에서 공룡이 살던 시대는?',
+       choices:['고생대(5~2.5억 년 전)','중생대(2.5~0.66억 년 전)','신생대(0.66억 년~현재)','선캄브리아대(40~5억 년 전)'],ans:1,
+       fact:'공룡은 <strong>중생대</strong>(트라이아이스기~백악기, 약 2억 3천만~6,600만 년 전)에 살았어요! 인류의 역사 300만 년에 비해 공룡은 1억 6,000만 년 이상 지구를 지배했습니다.'},
+      {scene:'🦴',sceneText:'거대한 T-렉스와 마주쳤어요! 선생님이 걱정 말라고 합니다.',
+       q:'티라노사우루스 렉스(T-rex)에 대한 설명 중 맞는 것은?',
+       choices:['가장 빠른 공룡','앞다리가 매우 강력했다','최강 포식자였지만 앞다리는 작았다','식물만 먹었다'],ans:2,
+       fact:'T-rex는 당시 <strong>최강 포식자</strong>였지만, 앞다리가 유난히 짧고 작았어요. 무는 힘은 현존 동물 중 최강인 아크로칸토사우루스보다 강했고, 물 수 있는 힘이 3~6톤에 달했어요!'},
+      {scene:'🌠',sceneText:'6,600만 년 전! 갑자기 하늘에 불덩이가 보입니다. 선생님이 빨리 도망가라고 소리쳐요!',
+       q:'공룡이 멸종한 주요 원인은?',
+       choices:['포유류가 다 잡아먹음','거대 소행성 충돌+화산 폭발','홍수','추위'],ans:1,
+       fact:'약 6,600만 년 전 지름 약 10km의 <strong>소행성이 멕시코 유카탄 반도에 충돌</strong>하면서 전 지구적 대참사가 벌어졌어요! 먼지가 태양을 가리고, 화산 폭발까지 겹쳐 공룡을 포함한 생물의 75%가 멸종했습니다.'},
+      {scene:'🐓',sceneText:'공룡 뼈 옆에 닭이 서 있어요. 선생님이 "사실 이 둘은 친척이야"라고 합니다.',
+       q:'오늘날 공룡의 직계 후손은?',
+       choices:['악어','도마뱀','새(조류)','거북이'],ans:2,
+       fact:'<strong>새(조류)</strong>가 바로 공룡의 직계 후손이에요! 수각류 공룡에서 진화했으며, 과학적으로 새는 조류형 공룡으로 분류돼요. 치킨을 먹는 건 공룡을 먹는 거나 마찬가지랍니다.'},
+      {scene:'🥚',sceneText:'공룡 알 무더기 앞에 왔어요. 엄마 공룡이 알을 품고 있어요.',
+       q:'가장 긴 공룡은 무엇인가요?',
+       choices:['티라노사우루스 (12m)','아르헨티노사우루스 (30~40m)','브라키오사우루스 (26m)','트리케라톱스 (9m)'],ans:1,
+       fact:'<strong>아르헨티노사우루스</strong>는 약 30~40m로 추정되는 역대 최장 공룡이에요! 무게는 70~80톤으로 지구 역사상 가장 무거운 육상 동물입니다. 이 공룡 발자국 하나에 사람이 누울 수 있어요.'},
+    ]
+  },
+  {
+    id:'weather', icon:'🌈', name:'날씨 마법사', color:'#a855f7',
+    desc:'구름 · 비 · 태풍',
+    qs:[
+      {scene:'☁️',sceneText:'구름 속으로 날아들었어요! 하얗고 폭신해 보이지만 사실 엄청 무겁다고 해요.',
+       q:'구름은 무엇으로 만들어졌나요?',
+       choices:['솜','수증기만','아주 작은 물방울과 얼음 결정','연기'],ans:2,
+       fact:'구름은 <strong>아주 작은 물방울(또는 얼음 결정)</strong>이 수십억 개 모인 거예요! 평범한 적운 구름 하나의 무게가 약 500톤에 달합니다. 하지만 물방울이 너무 작아 공기 중에 떠 있을 수 있어요.'},
+      {scene:'🌧️',sceneText:'빗방울 속으로 들어갔어요! 떨어지면서 모양이 계속 바뀌고 있어요.',
+       q:'빗방울의 실제 모양은?',
+       choices:['물방울(눈물) 모양','완전한 구형','낙하할수록 햄버거 빵 모양','네모'],ans:2,
+       fact:'빗방울이 떨어질 때는 공기 저항으로 위는 평평하고 아래가 볼록한 <strong>햄버거 빵 모양</strong>이 됩니다! 영화에서 눈물처럼 뾰족한 아래 모양으로 그리는 건 틀린 거예요.'},
+      {scene:'🌀',sceneText:'태풍 중심부에 들어왔어요! 놀랍게도 태풍의 눈 안은 조용해요.',
+       q:'태풍에 대한 설명 중 틀린 것은?',
+       choices:['태풍의 눈은 고요하다','북반구에서 반시계 방향으로 돈다','따뜻한 바다에서 에너지를 얻는다','남반구에서도 같은 방향으로 돈다'],ans:3,
+       fact:'태풍은 <strong>북반구에서 반시계 방향, 남반구에서 시계 방향</strong>으로 회전해요! 지구 자전에 의한 전향력(코리올리 효과) 때문이에요. 적도에서는 태풍이 생기지 않아요.'},
+      {scene:'❄️',sceneText:'눈송이 하나를 확대경으로 봤어요! 아름다운 결정 구조가 보여요.',
+       q:'눈 결정이 항상 6각형인 이유는?',
+       choices:['우연의 일치','물 분자(H₂O)의 결합 구조','눈이 예뻐야 해서','6이 행운의 숫자여서'],ans:1,
+       fact:'<strong>물 분자(H₂O)</strong>가 얼 때 수소 결합으로 연결되는 각도가 약 120°로, 자연스럽게 6각형 격자 구조가 됩니다! 눈 결정은 모두 6각 구조를 갖지만, 형태는 하나도 같은 게 없어요.'},
+      {scene:'🌡️',sceneText:'온도계 앞에서 오늘 날씨를 예측하려고 해요.',
+       q:'일기 예보에서 강수 확률 60%의 의미는?',
+       choices:['60% 지역에 비가 온다','하루의 60% 시간 동안 비가 온다','예보 지역에 비가 올 가능성이 60%','6mm 비가 온다'],ans:2,
+       fact:'강수 확률 60%는 <strong>"이런 기상 조건에서 100번 중 60번은 비가 왔다"</strong>는 통계적 의미예요! 특정 장소나 시간을 뜻하지 않습니다. 현재 슈퍼컴퓨터로 계산하지만 날씨 예측은 7일이 넘으면 정확도가 크게 낮아져요.'},
+    ]
+  },
+  {
+    id:'plant', icon:'🌿', name:'식물의 비밀', color:'#16a34a',
+    desc:'광합성 · 씨앗 · 식충식물',
+    qs:[
+      {scene:'🌱',sceneText:'씨앗 하나가 땅에 떨어졌어요. 물을 받으니 뿌리가 나오고 새싹이 올라옵니다!',
+       q:'식물이 광합성으로 만드는 것은?',
+       choices:['산소와 물','포도당과 산소','이산화탄소와 물','질소와 포도당'],ans:1,
+       fact:'광합성은 <strong>빛에너지 + 물(H₂O) + 이산화탄소(CO₂) → 포도당 + 산소</strong>입니다! 식물은 포도당을 에너지원으로 쓰고, 산소는 부산물로 내보내요. 우리가 숨 쉬는 산소는 모두 식물의 광합성 덕분이에요.'},
+      {scene:'🌻',sceneText:'해바라기 밭을 지나가고 있어요. 해바라기들이 모두 태양을 바라보고 있어요!',
+       q:'해바라기가 태양을 따라 움직이는 현상을 무엇이라 하나요?',
+       choices:['굴중성','굴광성','굴수성','굴화성'],ans:1,
+       fact:'식물이 빛을 향해 움직이는 것을 <strong>굴광성</strong>이라 해요! 성장 호르몬(옥신)이 빛이 적은 쪽에 더 많이 모여 그쪽이 더 빨리 자라며 빛 쪽으로 굽습니다. 뿌리는 반대로 빛을 피해 자라요.'},
+      {scene:'🪲',sceneText:'파리지옥이 벌레를 기다리고 있어요. 벌레가 닿으면 0.1초 안에 닫힙니다!',
+       q:'파리지옥이 곤충을 잡아먹는 이유는?',
+       choices:['곤충이 맛있어서','질소 부족한 토양에서 영양 보충','물이 없어서','보호를 위해'],ans:1,
+       fact:'파리지옥은 <strong>질소</strong>가 부족한 습지에 살아서 단백질이 풍부한 곤충을 잡아 질소를 보충해요! 덫이 닫히면 소화액을 분비해 10일 정도 걸쳐 소화합니다. 짝이 아닌 물체에는 반응하지 않는 영리함도 있어요.'},
+      {scene:'🌳',sceneText:'거대한 나무 앞에 섰어요. 나이테를 세어보니 500개나 돼요!',
+       q:'나무 나이테에서 알 수 있는 것이 아닌 것은?',
+       choices:['나무의 나이','그 해의 기후(비 많고 적음)','어느 방향이 남쪽인지','나무가 수분을 얼마나 흡수했는지'],ans:3,
+       fact:'나이테로 나무 나이, 기후(넓으면 좋은 해, 좁으면 건조/추운 해), 심지어 <strong>남북 방향</strong>도 알 수 있어요(남쪽 나이테가 더 넓음)! 하지만 정확한 수분 흡수량은 나이테만으로 알기 어렵습니다.'},
+      {scene:'🌸',sceneText:'꽃이 활짝 피었어요! 벌이 날아와 꿀을 가져갑니다.',
+       q:'식물이 꽃을 피우는 주된 이유는?',
+       choices:['예쁘게 보이려고','사람들을 위해','수분(가루받이)을 통해 씨앗 만들기','산소 만들기'],ans:2,
+       fact:'꽃의 아름다운 색깔과 향기는 <strong>벌, 나비, 새</strong> 등을 유인해 꽃가루를 옮기게 하는 전략이에요! 수분이 이루어져야 열매와 씨앗이 만들어집니다. 식물이 수억 년에 걸쳐 개발한 생존 전략이에요.'},
+    ]
+  },
+  {
+    id:'micro', icon:'🔬', name:'작은 세계', color:'#f97316',
+    desc:'세포 · 바이러스 · 박테리아',
+    qs:[
+      {scene:'🧫',sceneText:'현미경으로 들어갔어요! 믿을 수 없을 만큼 작은 세계가 펼쳐집니다.',
+       q:'세포의 에너지 공장 역할을 하는 세포 소기관은?',
+       choices:['핵','세포막','미토콘드리아','리보솜'],ans:2,
+       fact:'<strong>미토콘드리아</strong>는 세포의 에너지 공장으로, 포도당과 산소를 이용해 ATP(에너지)를 만들어요! 원래는 독립 생명체였다가 세포 안에 들어온 것으로 추정됩니다. 그래서 자체 DNA를 가지고 있어요.'},
+      {scene:'🦠',sceneText:'바이러스가 보입니다! 생각보다 훨씬 단순한 구조네요.',
+       q:'바이러스와 세균(박테리아)의 차이점은?',
+       choices:['크기만 다르다','바이러스는 스스로 증식 불가, 세균은 가능','세균이 더 위험하다','바이러스는 치료 가능, 세균은 불가'],ans:1,
+       fact:'<strong>바이러스</strong>는 스스로 복제를 못 하고 반드시 살아있는 세포 안에 들어가야 해요. 세균은 자체적으로 분열·번식이 가능한 단세포 생물입니다. 세균은 항생제로 치료하지만, 바이러스에는 항생제가 듣지 않아요!'},
+      {scene:'🧬',sceneText:'DNA 나선 구조가 빙글빙글 돌고 있어요! 엄청난 정보가 담겨있어요.',
+       q:'인체 세포 하나에 들어있는 DNA를 펼치면 길이는?',
+       choices:['1mm','1cm','약 2m','약 2km'],ans:2,
+       fact:'세포 하나의 핵 속 DNA를 펼치면 약 <strong>2m</strong>! 몸의 모든 세포를 합치면 약 370억 개 세포 × 2m = 지구에서 명왕성까지 거리의 약 8배나 됩니다. 이 정보가 0.005mm 핵에 압축되어 있어요.'},
+      {scene:'💉',sceneText:'백신이 몸 안으로 들어갔어요! 면역 세포들이 훈련을 시작합니다.',
+       q:'백신이 감염병을 예방하는 원리는?',
+       choices:['바이러스를 죽이는 약','약한 항원으로 면역계를 미리 훈련','몸을 강하게 만드는 영양제','바이러스가 못 들어오게 막는 벽'],ans:1,
+       fact:'백신은 <strong>죽이거나 약화된 병원체(또는 그 일부)</strong>를 투여해 실제 감염 전에 면역계가 항체를 만들도록 훈련시켜요! 실제 병원체가 들어오면 이미 훈련된 면역계가 빠르게 제거합니다.'},
+      {scene:'🫧',sceneText:'비눗물이 세균과 만났어요! 세균들이 퍼지지 못하고 사라집니다.',
+       q:'비누가 세균을 제거하는 원리는?',
+       choices:['세균을 죽이는 독','세균의 기름막(세포막)을 파괴','물로 씻어내는 것과 같다','산성으로 세균 제거'],ans:1,
+       fact:'비누 분자는 한쪽은 기름(세균 막), 다른 쪽은 물과 결합해요. 이로 인해 <strong>세균의 지질 세포막이 파괴</strong>되고, 세균이 물과 함께 씻겨 내려갑니다! 바이러스도 외막이 있으면 같은 원리로 제거돼요.'},
+    ]
+  },
+  {
+    id:'earth', icon:'🌍', name:'지구 속으로', color:'#dc2626',
+    desc:'지층 · 화산 · 판구조론',
+    qs:[
+      {scene:'🌋',sceneText:'화산이 폭발하고 있어요! 마그마가 솟구칩니다. 버스에 방열 방패가 켜집니다.',
+       q:'마그마와 용암의 차이는?',
+       choices:['같은 것이다','마그마는 땅 속, 용암은 지표에 나온 것','온도 차이','색깔 차이'],ans:1,
+       fact:'<strong>마그마(Magma)</strong>는 지구 내부의 녹은 암석이고, 화산 폭발로 지표에 나오면 <strong>용암(Lava)</strong>이라 해요! 용암 온도는 700~1,200°C이고, 흐르는 속도는 종류에 따라 걷는 속도(1km/h)에서 시속 60km까지 다양해요.'},
+      {scene:'🪨',sceneText:'거대한 지층 절벽 앞에 있어요. 색깔이 다른 줄무늬가 층층이 쌓여있어요.',
+       q:'지층에서 더 오래된 층은 어디에 있나요?',
+       choices:['위쪽','아래쪽','중간','랜덤'],ans:1,
+       fact:'지층은 퇴적물이 차곡차곡 쌓여 형성되므로 <strong>아래쪽이 더 오래된 층</strong>입니다! 이를 지층 누중의 법칙이라 해요. 지층에서 공룡 화석이 발견되면 그 지층이 형성된 시대에 공룡이 살았다는 증거가 돼요.'},
+      {scene:'🌏',sceneText:'지구 내부 단면이 보입니다! 층층이 다른 구조로 이루어져 있어요.',
+       q:'지구 내부 구조를 바깥부터 순서대로 나열하면?',
+       choices:['지각-맨틀-외핵-내핵','맨틀-지각-외핵-내핵','지각-외핵-내핵-맨틀','내핵-외핵-맨틀-지각'],ans:0,
+       fact:'지구는 <strong>지각(0~70km)→맨틀(70~2,900km)→외핵(2,900~5,100km)→내핵(5,100~6,371km)</strong> 구조예요! 내핵은 고체 철/니켈이고, 외핵은 액체 상태예요. 외핵의 움직임이 지구 자기장을 만들어요.'},
+      {scene:'📍',sceneText:'세계 지도를 보니 대륙들이 퍼즐처럼 맞춰지는 것 같아요.',
+       q:'판구조론에 따르면 대륙이 움직이는 속도는?',
+       choices:['연간 1m','연간 2~10cm (손톱 자라는 속도)','연간 1km','연간 1mm'],ans:1,
+       fact:'대륙판은 <strong>1년에 약 2~10cm</strong>씩 움직여요. 인간의 손톱이 자라는 속도와 비슷하죠! 약 2억 5천만 년 전에는 모든 대륙이 '판게아'라는 하나의 대륙이었고, 지금도 움직이고 있어요.'},
+      {scene:'💎',sceneText:'땅속 깊은 곳에 다이아몬드가 만들어지고 있어요!',
+       q:'다이아몬드를 구성하는 원소는?',
+       choices:['실리콘(Si)','탄소(C)','철(Fe)','알루미늄(Al)'],ans:1,
+       fact:'다이아몬드는 순수한 <strong>탄소(C)</strong>로만 이루어져 있어요! 연필 심(흑연)도 탄소인데, 구조 차이로 흑연은 부드럽고 다이아몬드는 자연계에서 가장 단단합니다. 땅속 약 150km 깊이에서 고온·고압으로 만들어져요.'},
+    ]
+  },
+  {
+    id:'element', icon:'⚗️', name:'원소 여행', color:'#8b5cf6',
+    desc:'원자 · 주기율표 · 물질',
+    qs:[
+      {scene:'⚛️',sceneText:'원자 속으로 들어왔어요! 핵 주변으로 전자들이 빙빙 돌고 있어요.',
+       q:'원자의 구성 요소가 아닌 것은?',
+       choices:['양성자','중성자','전자','광자'],ans:3,
+       fact:'원자는 <strong>양성자+중성자</strong>로 이루어진 핵과, 핵 주위를 도는 <strong>전자</strong>로 구성돼요! 광자는 빛의 입자예요. 원자의 대부분은 텅 빈 공간이고, 핵의 크기는 원자 전체 크기의 10만 분의 1이에요.'},
+      {scene:'💧',sceneText:'물 분자를 확대해 봤어요. 산소 하나에 수소 두 개가 붙어있어요.',
+       q:'물(H₂O)의 특별한 성질이 아닌 것은?',
+       choices:['얼면 부피가 늘어난다','높은 비열(온도 변화 느림)','전기가 잘 통한다','4°C에서 밀도 최대'],ans:2,
+       fact:'순수한 물은 전기가 <strong>잘 통하지 않아요</strong>! 전기가 통하는 건 물에 녹아있는 이온(소금, 미네랄 등) 때문이에요. 물은 얼면 부피가 약 9% 늘어나서 얼음이 물에 뜨는 특이한 성질이 있어요.'},
+      {scene:'🧪',sceneText:'주기율표 앞에 섰어요! 118개의 원소가 규칙적으로 배열되어 있어요.',
+       q:'주기율표를 처음 만든 과학자는?',
+       choices:['아이작 뉴턴','드미트리 멘델레예프','알베르트 아인슈타인','마리 퀴리'],ans:1,
+       fact:'러시아 과학자 <strong>드미트리 멘델레예프</strong>는 1869년 당시 알려진 63개 원소를 원자량 순으로 배열해 주기율표를 만들었어요! 심지어 아직 발견 안 된 원소의 빈칸도 남겨뒀고, 이후 실제로 발견되어 그의 예측이 맞았어요.'},
+      {scene:'☢️',sceneText:'방사성 원소가 에너지를 내뿜고 있어요! 선생님이 방호복을 입으라고 합니다.',
+       q:'방사능에 대한 설명 중 맞는 것은?',
+       choices:['모든 원소는 방사능이 있다','불안정한 핵이 붕괴하며 방사선 방출','방사선은 항상 치명적이다','눈에 보인다'],ans:1,
+       fact:'방사능은 불안정한 원자핵이 안정한 상태로 변하며 <strong>에너지(방사선)를 내뿜는 현상</strong>이에요. 우리 몸 속에도 칼륨-40 같은 방사성 원소가 있어요! 의료용 X선, 암 치료 방사선 요법 등 유익하게 쓰이기도 합니다.'},
+      {scene:'🌡️',sceneText:'가장 가벼운 원소가 엄청난 에너지를 내고 있어요!',
+       q:'태양에서 에너지가 나오는 원리는?',
+       choices:['수소가 타는 것(연소)','수소 핵융합','우라늄 핵분열','태양 내부 화학반응'],ans:1,
+       fact:'태양은 <strong>수소 핵융합</strong>으로 에너지를 만들어요! 4개의 수소 원자핵이 합쳐져 헬륨 1개가 되면서 줄어든 질량이 에너지로 변환됩니다(E=mc²). 매 초 약 6억 톤의 수소가 헬륨으로 변환되고 있어요.'},
+    ]
+  },
+];
+
+// ── 상태 ──
+let currentTopic = null;
+let currentQ = 0;
+let score = 0;
+let answered = false;
+const done = {};
+
+// ── 홈 렌더 ──
+function renderHome(){
+  const grid=document.getElementById('topic-grid');
+  grid.innerHTML=TOPICS.map(t=>`
+    <div class="topic-card${done[t.id]?' done':''}" style="--tc:${t.color}" onclick="startTopic('${t.id}')">
+      <span class="topic-badge">${done[t.id]?'✓ 완료':'5문제'}</span>
+      <span class="topic-icon">${t.icon}</span>
+      <h3>${t.name}</h3>
+      <p>${t.desc}</p>
+    </div>
+  `).join('');
+}
+
+// ── 주제 시작 ──
+function startTopic(id){
+  currentTopic=TOPICS.find(t=>t.id===id);
+  currentQ=0; score=0; answered=false;
+  document.getElementById('home').classList.add('hidden');
+  document.getElementById('result').classList.add('hidden');
+  document.getElementById('quiz').classList.remove('hidden');
+  document.getElementById('quiz-topic-name').textContent=currentTopic.icon+' '+currentTopic.name;
+  renderQ();
+}
+
+// ── 문제 렌더 ──
+function renderQ(){
+  answered=false;
+  const q=currentTopic.qs[currentQ];
+  const total=currentTopic.qs.length;
+  document.getElementById('progress-fill').style.width=((currentQ/total)*100)+'%';
+  document.getElementById('q-num').textContent=(currentQ+1)+' / '+total;
+  document.getElementById('scene-icon').textContent=q.scene;
+  document.getElementById('scene-text').innerHTML=q.sceneText;
+  document.getElementById('question-text').textContent=q.q;
+  document.getElementById('fact-box').classList.add('hidden');
+  document.getElementById('next-btn').classList.add('hidden');
+  const letters=['A','B','C','D'];
+  document.getElementById('choices').innerHTML=q.choices.map((c,i)=>`
+    <button class="choice" onclick="choose(${i})" id="choice-${i}">
+      <span class="choice-letter">${letters[i]}</span>${c}
+    </button>
+  `).join('');
+}
+
+// ── 답 선택 ──
+function choose(idx){
+  if(answered) return;
+  answered=true;
+  const q=currentTopic.qs[currentQ];
+  const btns=document.querySelectorAll('.choice');
+  btns.forEach(b=>b.classList.add('disabled'));
+  btns[idx].classList.add(idx===q.ans?'correct':'wrong');
+  if(idx===q.ans){
+    score++;
+    btns[idx].innerHTML='<span class="choice-letter">✓</span>'+q.choices[idx];
+  } else {
+    btns[q.ans].classList.add('correct');
+  }
+  const fb=document.getElementById('fact-box');
+  fb.innerHTML='💡 <strong>재미있는 사실!</strong><br>'+q.fact;
+  fb.classList.remove('hidden');
+  document.getElementById('next-btn').classList.remove('hidden');
+  document.getElementById('next-btn').textContent=currentQ<currentTopic.qs.length-1?'다음 문제 →':'결과 보기 🎉';
+}
+
+// ── 다음 문제 ──
+function nextQ(){
+  currentQ++;
+  if(currentQ>=currentTopic.qs.length){ showResult(); return; }
+  renderQ();
+}
+
+// ── 결과 ──
+function showResult(){
+  document.getElementById('quiz').classList.add('hidden');
+  document.getElementById('result').classList.remove('hidden');
+  done[currentTopic.id]=true;
+  const total=currentTopic.qs.length;
+  const pct=score/total;
+  let icon,title,stars;
+  if(pct===1){icon='🏆';title='완벽해요! 천재 탐험가!';stars='⭐⭐⭐⭐⭐'}
+  else if(pct>=0.8){icon='🎉';title='훌륭해요! 대단한 탐험가!';stars='⭐⭐⭐⭐'}
+  else if(pct>=0.6){icon='👍';title='잘했어요! 과학자 꿈나무!';stars='⭐⭐⭐'}
+  else if(pct>=0.4){icon='💪';title='다시 도전해봐요!';stars='⭐⭐'}
+  else{icon='🚌';title='버스를 타고 다시 탐험!';stars='⭐'}
+  document.getElementById('result-icon').textContent=currentTopic.icon;
+  document.getElementById('result-title').textContent=title;
+  document.getElementById('result-stars').textContent=stars;
+  document.getElementById('result-score').textContent=`${currentTopic.name} — ${score}/${total}문제 정답!`;
+  renderHome();
+}
+
+function retryTopic(){ startTopic(currentTopic.id); }
+function goHome(){
+  document.getElementById('quiz').classList.add('hidden');
+  document.getElementById('result').classList.add('hidden');
+  document.getElementById('home').classList.remove('hidden');
+}
+
+renderHome();
+</script>
+</body>
+</html>
