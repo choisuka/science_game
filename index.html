@@ -115,6 +115,11 @@ canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
 .intro-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
 .btn-start{padding:.9rem 2.2rem;border-radius:100px;border:none;background:linear-gradient(135deg,#f97316,#a855f7);color:#fff;font-size:1rem;font-weight:800;cursor:pointer}
 .btn-back2{padding:.9rem 1.6rem;border-radius:100px;border:none;background:var(--bg3);color:var(--text);font-size:1rem;font-weight:700;cursor:pointer}
+.story-section{background:var(--bg2);border-radius:var(--r);padding:1.4rem 1.2rem;margin-bottom:1.4rem;border:1px solid rgba(255,255,255,.07);text-align:left}
+.story-section h4{font-size:1rem;font-weight:900;margin-bottom:1rem;color:#7dd3c8}
+.story-block{margin-bottom:1rem}
+.story-block .s-label{font-size:.85rem;font-weight:800;margin-bottom:.3rem;color:var(--text)}
+.story-block p{font-size:.82rem;color:var(--text2);line-height:1.9}
 
 /* ── 결과 화면 ── */
 #result{text-align:center;padding-top:3rem}
@@ -147,6 +152,7 @@ canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
   <h2 class="intro-name" id="intro-name"></h2>
   <p class="intro-desc" id="intro-desc"></p>
   <div id="video-area"></div>
+  <div id="story-area"></div>
   <div class="intro-btns">
     <button class="btn-back2" onclick="goHome()">← 돌아가기</button>
     <button class="btn-start" onclick="beginQuiz()">퀴즈 시작! 🚀</button>
@@ -197,6 +203,11 @@ const TOPICS = [
     id:'space', icon:'🚀', name:'우주 탐험', color:'#3b82f6',
     desc:'태양계 · 별 · 블랙홀',
     vids:['Td_A9H69eE8','e8YzKyot4Pc','ya6Ko9bF5v8','osSkJuohjM8','whSAgISrGME','sePqPIXMsAc'],
+    story:[
+      {label:'☀️ 우주에서 가장 큰 불공',text:'태양은 우리 지구보다 훨씬, 훨씬 더 커. 지구가 100만 개나 들어갈 수 있을 정도지!'},
+      {label:'빛과 열의 선물',text:'태양이 없다면 지구는 꽁꽁 얼어붙은 얼음 나라가 될 거야. 태양 덕분에 식물들이 쑥쑥 자라고 우리도 따뜻하게 지낼 수 있는 거란다.'},
+      {label:'우리의 대장 별',text:'태양은 사실 우주에 있는 수많은 \'별\' 중 하나야. 하지만 우리 지구와 가장 가깝기 때문에 우리에게 가장 소중한 대장 별이 되었지!'},
+    ],
     qs:[
       {scene:'🌍',sceneText:'버스가 지구를 떠나 우주로 날아갑니다! 창밖으로 아름다운 지구가 점점 작아져요.',
        q:'태양계에서 가장 큰 행성은 무엇인가요?',
@@ -278,6 +289,11 @@ const TOPICS = [
     id:'electricity', icon:'⚡', name:'전기 마법', color:'#eab308',
     desc:'전류 · 회로 · 번개',
     vids:['mc979OhitAg','Dx3RpXdJw2k'],
+    story:[
+      {label:'⚡ 전기는 \'흐름\'이에요',text:'아주 작은 알갱이(전자)들이 긴 고속도로(전선)를 따라 엄청나게 빨리 달리는 게 바로 전기야.'},
+      {label:'전기 공장(발전소)',text:'거대한 바람개비를 돌리거나(풍력), 뜨거운 열을 이용해 전기를 만들어내지. 이렇게 만들어진 전기는 구불구불한 전선을 타고 우리 집 콘센트까지 여행을 온단다.'},
+      {label:'⚠️ 주의!',text:'전기는 힘이 아주 세서 조심해야 해. 젖은 손으로 만지면 전기가 우리 몸으로 소풍을 오려고 해서 위험할 수 있으니 꼭 조심하자!'},
+    ],
     qs:[
       {scene:'🔋',sceneText:'버스가 전지 안으로 들어갔어요! (+)극과 (-)극 사이에서 전자들이 달려가고 있어요.',
        q:'전기 회로에서 전류의 방향은?',
@@ -440,6 +456,11 @@ const TOPICS = [
     id:'element', icon:'⚗️', name:'원소 여행', color:'#8b5cf6',
     desc:'원자 · 주기율표 · 물질',
     vids:['O-48znAg7VE','efaaNH-LbTQ'],
+    story:[
+      {label:'🧊 딱딱한 고체',text:'얼음처럼 모양이 딱딱하게 정해져 있는 친구들이야. 입자들이 서로 꼭 껴안고 있어서 움직이지 않지. 마치 수업 시간에 집중해서 자리에 앉아 있는 우리 모습 같아!'},
+      {label:'찰랑찰랑 액체',text:'물처럼 컵에 담으면 컵 모양으로 변하는 친구들이야. 입자들이 손을 잡고 조금씩 움직일 수 있거든. 미끄럼틀을 타고 내려오는 것처럼 자유롭지.'},
+      {label:'둥실둥실 기체',text:'공기나 수증기처럼 눈에 잘 보이지도 않고 어디로든 날아가는 친구들이야. 입자들이 서로 멀리 떨어져서 신나게 뛰어다니고 있어. 마치 운동장에서 뛰어노는 시간 같지?'},
+    ],
     qs:[
       {scene:'⚛️',sceneText:'원자 속으로 들어왔어요! 핵 주변으로 전자들이 빙빙 돌고 있어요.',
        q:'원자의 구성 요소가 아닌 것은?',
@@ -523,6 +544,21 @@ function startTopic(id){
     renderVid();
   } else {
     va.innerHTML='<div class="no-vid">📹 이 주제는 곧 영상이 추가될 예정이에요!</div>';
+  }
+  // 과학 이야기 섹션
+  const sa=document.getElementById('story-area');
+  if(currentTopic.story&&currentTopic.story.length){
+    sa.innerHTML=`<div class="story-section">
+      <h4>📖 오늘의 과학 이야기</h4>
+      ${currentTopic.story.map(s=>`
+        <div class="story-block">
+          <div class="s-label">${s.label}</div>
+          <p>${s.text}</p>
+        </div>
+      `).join('')}
+    </div>`;
+  } else {
+    sa.innerHTML='';
   }
   document.getElementById('intro').classList.remove('hidden');
 }
