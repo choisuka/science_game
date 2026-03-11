@@ -100,6 +100,18 @@ canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
 }
 .next-btn:hover{opacity:.87}
 
+/* ── 주제 소개(영상) 화면 ── */
+#intro{text-align:center;padding-top:3rem}
+.intro-icon{font-size:5rem;display:block;margin-bottom:.6rem;animation:busFloat 2.5s ease-in-out infinite}
+.intro-name{font-size:2rem;font-weight:900;margin-bottom:.3rem}
+.intro-desc{color:var(--text2);font-size:.95rem;margin-bottom:1.6rem}
+.video-box{position:relative;width:100%;padding-top:56.25%;border-radius:var(--r);overflow:hidden;margin-bottom:1.4rem;background:#000}
+.video-box iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.no-vid{background:var(--bg2);border-radius:var(--r);padding:2.5rem 1rem;color:var(--text2);font-size:.9rem;margin-bottom:1.4rem}
+.intro-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn-start{padding:.9rem 2.2rem;border-radius:100px;border:none;background:linear-gradient(135deg,#f97316,#a855f7);color:#fff;font-size:1rem;font-weight:800;cursor:pointer}
+.btn-back2{padding:.9rem 1.6rem;border-radius:100px;border:none;background:var(--bg3);color:var(--text);font-size:1rem;font-weight:700;cursor:pointer}
+
 /* ── 결과 화면 ── */
 #result{text-align:center;padding-top:3rem}
 .result-icon{font-size:5rem;display:block;margin-bottom:1rem;animation:spin .5s ease}
@@ -122,6 +134,18 @@ canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
   <h1>과학탐험대</h1>
   <p class="sub">매직스쿨버스를 타고 떠나는 신비한 과학 여행!<br>10가지 주제, 주제마다 5문제 도전!</p>
   <div class="topic-grid" id="topic-grid"></div>
+</div>
+
+<!-- ── 주제 소개 ── -->
+<div class="wrap hidden" id="intro">
+  <span class="intro-icon" id="intro-icon"></span>
+  <h2 class="intro-name" id="intro-name"></h2>
+  <p class="intro-desc" id="intro-desc"></p>
+  <div id="video-area"></div>
+  <div class="intro-btns">
+    <button class="btn-back2" onclick="goHome()">← 돌아가기</button>
+    <button class="btn-start" onclick="beginQuiz()">퀴즈 시작! 🚀</button>
+  </div>
 </div>
 
 <!-- ── 퀴즈 ── -->
@@ -167,6 +191,7 @@ const TOPICS = [
   {
     id:'space', icon:'🚀', name:'우주 탐험', color:'#3b82f6',
     desc:'태양계 · 별 · 블랙홀',
+    vid:'CoGdsEkWi-E',
     qs:[
       {scene:'🌍',sceneText:'버스가 지구를 떠나 우주로 날아갑니다! 창밖으로 아름다운 지구가 점점 작아져요.',
        q:'태양계에서 가장 큰 행성은 무엇인가요?',
@@ -193,6 +218,7 @@ const TOPICS = [
   {
     id:'body', icon:'🫀', name:'인체의 비밀', color:'#ef4444',
     desc:'심장 · 뼈 · 뇌',
+    vid:'jFO0pM_GXBI',
     qs:[
       {scene:'❤️',sceneText:'버스가 작아져서 혈관 속으로 들어갑니다! 심장이 쿵쿵 뛰는 소리가 들려요.',
        q:'사람의 심장은 하루에 약 몇 번 뛰나요?',
@@ -219,6 +245,7 @@ const TOPICS = [
   {
     id:'ocean', icon:'🌊', name:'바다 세계', color:'#0ea5e9',
     desc:'심해 · 해양생물 · 물의 순환',
+    vid:'KQ6zr6kCPj8',
     qs:[
       {scene:'🐳',sceneText:'잠수함이 바다 깊이 내려갑니다. 빛이 점점 사라지고 이상한 생물들이 나타나요!',
        q:'지구에서 가장 깊은 바다 지점은?',
@@ -245,6 +272,7 @@ const TOPICS = [
   {
     id:'electricity', icon:'⚡', name:'전기 마법', color:'#eab308',
     desc:'전류 · 회로 · 번개',
+    vid:'mc979OhitAg',
     qs:[
       {scene:'🔋',sceneText:'버스가 전지 안으로 들어갔어요! (+)극과 (-)극 사이에서 전자들이 달려가고 있어요.',
        q:'전기 회로에서 전류의 방향은?',
@@ -271,6 +299,7 @@ const TOPICS = [
   {
     id:'dino', icon:'🦕', name:'공룡 시대', color:'#22c55e',
     desc:'쥐라기 · 백악기 · 멸종',
+    vid:'GkuGlCPFvS4',
     qs:[
       {scene:'🌿',sceneText:'버스가 시간을 거슬러 1억 년 전으로! 거대한 숲에서 공룡 발소리가 들려요.',
        q:'지구에서 공룡이 살던 시대는?',
@@ -297,6 +326,7 @@ const TOPICS = [
   {
     id:'weather', icon:'🌈', name:'날씨 마법사', color:'#a855f7',
     desc:'구름 · 비 · 태풍',
+    vid:'IKBngeq1QSE',
     qs:[
       {scene:'☁️',sceneText:'구름 속으로 날아들었어요! 하얗고 폭신해 보이지만 사실 엄청 무겁다고 해요.',
        q:'구름은 무엇으로 만들어졌나요?',
@@ -323,6 +353,7 @@ const TOPICS = [
   {
     id:'plant', icon:'🌿', name:'식물의 비밀', color:'#16a34a',
     desc:'광합성 · 씨앗 · 식충식물',
+    vid:'WuyKbQmlSvU',
     qs:[
       {scene:'🌱',sceneText:'씨앗 하나가 땅에 떨어졌어요. 물을 받으니 뿌리가 나오고 새싹이 올라옵니다!',
        q:'식물이 광합성으로 만드는 것은?',
@@ -349,6 +380,7 @@ const TOPICS = [
   {
     id:'micro', icon:'🔬', name:'작은 세계', color:'#f97316',
     desc:'세포 · 바이러스 · 박테리아',
+    vid:'GaF-dGxFXCk',
     qs:[
       {scene:'🧫',sceneText:'현미경으로 들어갔어요! 믿을 수 없을 만큼 작은 세계가 펼쳐집니다.',
        q:'세포의 에너지 공장 역할을 하는 세포 소기관은?',
@@ -375,6 +407,7 @@ const TOPICS = [
   {
     id:'earth', icon:'🌍', name:'지구 속으로', color:'#dc2626',
     desc:'지층 · 화산 · 판구조론',
+    vid:'7GRj_dvQknY',
     qs:[
       {scene:'🌋',sceneText:'화산이 폭발하고 있어요! 마그마가 솟구칩니다. 버스에 방열 방패가 켜집니다.',
        q:'마그마와 용암의 차이는?',
@@ -401,6 +434,7 @@ const TOPICS = [
   {
     id:'element', icon:'⚗️', name:'원소 여행', color:'#8b5cf6',
     desc:'원자 · 주기율표 · 물질',
+    vid:'O-48znAg7VE',
     qs:[
       {scene:'⚛️',sceneText:'원자 속으로 들어왔어요! 핵 주변으로 전자들이 빙빙 돌고 있어요.',
        q:'원자의 구성 요소가 아닌 것은?',
@@ -442,16 +476,37 @@ function renderHome(){
       <span class="topic-icon">${t.icon}</span>
       <h3>${t.name}</h3>
       <p>${t.desc}</p>
+      ${t.vid?'<span style="font-size:.7rem;color:#a78bfa;margin-top:.5rem;display:block">▶ 영상 포함</span>':''}
     </div>
   `).join('');
 }
 
-// ── 주제 시작 ──
+// ── 주제 선택 → 소개 화면 ──
 function startTopic(id){
   currentTopic=TOPICS.find(t=>t.id===id);
-  currentQ=0; score=0; answered=false;
   document.getElementById('home').classList.add('hidden');
   document.getElementById('result').classList.add('hidden');
+  document.getElementById('quiz').classList.add('hidden');
+  // 소개 화면 세팅
+  document.getElementById('intro-icon').textContent=currentTopic.icon;
+  document.getElementById('intro-name').textContent=currentTopic.name;
+  document.getElementById('intro-desc').textContent=currentTopic.desc;
+  const va=document.getElementById('video-area');
+  if(currentTopic.vid){
+    va.innerHTML=`<div class="video-box"><iframe src="https://www.youtube.com/embed/${currentTopic.vid}?rel=0" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>`;
+  } else {
+    va.innerHTML='<div class="no-vid">📹 이 주제는 곧 영상이 추가될 예정이에요!</div>';
+  }
+  document.getElementById('intro').classList.remove('hidden');
+}
+
+// ── 퀴즈 실제 시작 ──
+function beginQuiz(){
+  currentQ=0; score=0; answered=false;
+  // iframe 멈추기
+  const va=document.getElementById('video-area');
+  va.innerHTML='';
+  document.getElementById('intro').classList.add('hidden');
   document.getElementById('quiz').classList.remove('hidden');
   document.getElementById('quiz-topic-name').textContent=currentTopic.icon+' '+currentTopic.name;
   renderQ();
@@ -527,8 +582,11 @@ function showResult(){
 
 function retryTopic(){ startTopic(currentTopic.id); }
 function goHome(){
+  // iframe 정지
+  document.getElementById('video-area').innerHTML='';
   document.getElementById('quiz').classList.add('hidden');
   document.getElementById('result').classList.add('hidden');
+  document.getElementById('intro').classList.add('hidden');
   document.getElementById('home').classList.remove('hidden');
 }
 
