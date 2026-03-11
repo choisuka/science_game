@@ -592,6 +592,9 @@ function goHome(){
 }
 
 renderHome();
+// 설명 페이지에서 넘어올 때 해당 주제 자동 시작
+const hash = location.hash.slice(1);
+if(hash && TOPICS.find(t => t.id === hash)) startTopic(hash);
 </script>
 </body>
 </html>
