@@ -508,7 +508,11 @@ function startTopic(id){
           <span class="vid-counter">📹 영상 ${vi+1} / ${vids.length}</span>
           <button class="vid-nav-btn" onclick="vidNext()" ${vi===vids.length-1?'disabled':''}>›</button>
         </div>
-        <p style="font-size:.68rem;color:var(--text2);text-align:center;margin-bottom:.8rem">* 일부 영상은 업로더 설정으로 재생이 제한될 수 있습니다.</p>
+        <a href="https://www.youtube.com/watch?v=${vids[vi]}" target="_blank"
+          style="display:block;text-align:center;margin-bottom:.6rem;padding:.55rem 1.2rem;border-radius:100px;background:rgba(255,0,0,.15);border:1px solid rgba(255,80,80,.35);color:#f87171;font-size:.82rem;font-weight:700;text-decoration:none">
+          ▶ 오류 시 YouTube에서 직접 보기
+        </a>
+        <p style="font-size:.68rem;color:var(--text2);text-align:center;margin-bottom:.8rem">* 일부 영상은 업로더 설정으로 퍼가기가 제한됩니다.</p>
       `;
     }
     window.vidPrev=()=>{if(vi>0){vi--;renderVid();}};
