@@ -192,8 +192,7 @@ const TOPICS = [
   {
     id:'space', icon:'🚀', name:'우주 탐험', color:'#3b82f6',
     desc:'태양계 · 별 · 블랙홀',
-    vid:'Td_A9H69eE8',
-    vid2:'e8YzKyot4Pc',
+    vids:['Td_A9H69eE8','e8YzKyot4Pc','ya6Ko9bF5v8'],
     qs:[
       {scene:'🌍',sceneText:'버스가 지구를 떠나 우주로 날아갑니다! 창밖으로 아름다운 지구가 점점 작아져요.',
        q:'태양계에서 가장 큰 행성은 무엇인가요?',
@@ -220,7 +219,7 @@ const TOPICS = [
   {
     id:'body', icon:'🫀', name:'인체의 비밀', color:'#ef4444',
     desc:'심장 · 뼈 · 뇌',
-    vid:'jFO0pM_GXBI',
+    vids:['jFO0pM_GXBI'],
     qs:[
       {scene:'❤️',sceneText:'버스가 작아져서 혈관 속으로 들어갑니다! 심장이 쿵쿵 뛰는 소리가 들려요.',
        q:'사람의 심장은 하루에 약 몇 번 뛰나요?',
@@ -247,7 +246,7 @@ const TOPICS = [
   {
     id:'ocean', icon:'🌊', name:'바다 세계', color:'#0ea5e9',
     desc:'심해 · 해양생물 · 물의 순환',
-    vid:'KQ6zr6kCPj8',
+    vids:['KQ6zr6kCPj8'],
     qs:[
       {scene:'🐳',sceneText:'잠수함이 바다 깊이 내려갑니다. 빛이 점점 사라지고 이상한 생물들이 나타나요!',
        q:'지구에서 가장 깊은 바다 지점은?',
@@ -274,7 +273,7 @@ const TOPICS = [
   {
     id:'electricity', icon:'⚡', name:'전기 마법', color:'#eab308',
     desc:'전류 · 회로 · 번개',
-    vid:'mc979OhitAg',
+    vids:['mc979OhitAg'],
     qs:[
       {scene:'🔋',sceneText:'버스가 전지 안으로 들어갔어요! (+)극과 (-)극 사이에서 전자들이 달려가고 있어요.',
        q:'전기 회로에서 전류의 방향은?',
@@ -301,7 +300,7 @@ const TOPICS = [
   {
     id:'dino', icon:'🦕', name:'공룡 시대', color:'#22c55e',
     desc:'쥐라기 · 백악기 · 멸종',
-    vid:'GkuGlCPFvS4',
+    vids:['GkuGlCPFvS4'],
     qs:[
       {scene:'🌿',sceneText:'버스가 시간을 거슬러 1억 년 전으로! 거대한 숲에서 공룡 발소리가 들려요.',
        q:'지구에서 공룡이 살던 시대는?',
@@ -328,7 +327,7 @@ const TOPICS = [
   {
     id:'weather', icon:'🌈', name:'날씨 마법사', color:'#a855f7',
     desc:'구름 · 비 · 태풍',
-    vid:'IKBngeq1QSE',
+    vids:['IKBngeq1QSE'],
     qs:[
       {scene:'☁️',sceneText:'구름 속으로 날아들었어요! 하얗고 폭신해 보이지만 사실 엄청 무겁다고 해요.',
        q:'구름은 무엇으로 만들어졌나요?',
@@ -355,7 +354,7 @@ const TOPICS = [
   {
     id:'plant', icon:'🌿', name:'식물의 비밀', color:'#16a34a',
     desc:'광합성 · 씨앗 · 식충식물',
-    vid:'WuyKbQmlSvU',
+    vids:['WuyKbQmlSvU'],
     qs:[
       {scene:'🌱',sceneText:'씨앗 하나가 땅에 떨어졌어요. 물을 받으니 뿌리가 나오고 새싹이 올라옵니다!',
        q:'식물이 광합성으로 만드는 것은?',
@@ -382,7 +381,7 @@ const TOPICS = [
   {
     id:'micro', icon:'🔬', name:'작은 세계', color:'#f97316',
     desc:'세포 · 바이러스 · 박테리아',
-    vid:'GaF-dGxFXCk',
+    vids:['GaF-dGxFXCk'],
     qs:[
       {scene:'🧫',sceneText:'현미경으로 들어갔어요! 믿을 수 없을 만큼 작은 세계가 펼쳐집니다.',
        q:'세포의 에너지 공장 역할을 하는 세포 소기관은?',
@@ -409,7 +408,7 @@ const TOPICS = [
   {
     id:'earth', icon:'🌍', name:'지구 속으로', color:'#dc2626',
     desc:'지층 · 화산 · 판구조론',
-    vid:'7GRj_dvQknY',
+    vids:['7GRj_dvQknY'],
     qs:[
       {scene:'🌋',sceneText:'화산이 폭발하고 있어요! 마그마가 솟구칩니다. 버스에 방열 방패가 켜집니다.',
        q:'마그마와 용암의 차이는?',
@@ -436,7 +435,7 @@ const TOPICS = [
   {
     id:'element', icon:'⚗️', name:'원소 여행', color:'#8b5cf6',
     desc:'원자 · 주기율표 · 물질',
-    vid:'O-48znAg7VE',
+    vids:['O-48znAg7VE'],
     qs:[
       {scene:'⚛️',sceneText:'원자 속으로 들어왔어요! 핵 주변으로 전자들이 빙빙 돌고 있어요.',
        q:'원자의 구성 요소가 아닌 것은?',
@@ -494,10 +493,10 @@ function startTopic(id){
   document.getElementById('intro-name').textContent=currentTopic.name;
   document.getElementById('intro-desc').textContent=currentTopic.desc;
   const va=document.getElementById('video-area');
-  if(currentTopic.vid){
-    const vids=[currentTopic.vid, currentTopic.vid2].filter(Boolean);
+  const vids=currentTopic.vids||[];
+  if(vids.length){
     va.innerHTML=vids.map((v,i)=>`
-      <p style="font-size:.78rem;color:var(--text2);margin-bottom:.4rem">📹 영상 ${vids.length>1?i+1:''}</p>
+      ${vids.length>1?`<p style="font-size:.78rem;color:var(--text2);margin-bottom:.4rem">📹 영상 ${i+1}</p>`:''}
       <div class="video-box" style="margin-bottom:1rem"><iframe src="https://www.youtube.com/embed/${v}?rel=0" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>
     `).join('');
   } else {
