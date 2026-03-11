@@ -497,7 +497,7 @@ function startTopic(id){
   if(vids.length){
     va.innerHTML=vids.map((v,i)=>`
       ${vids.length>1?`<p style="font-size:.78rem;color:var(--text2);margin-bottom:.4rem">📹 영상 ${i+1}</p>`:''}
-      <div class="video-box" style="margin-bottom:1rem"><iframe src="https://www.youtube.com/embed/${v}?rel=0&modestbranding=1" title="Science Video" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>
+      <div class="video-box" style="margin-bottom:1rem"><iframe src="https://www.youtube.com/embed/${v}?rel=0&modestbranding=1&controls=1" title="Science Video" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>
       <p style="font-size:.7rem;color:var(--text2);text-align:center;margin-bottom:.8rem">* 유튜브 정책에 따라 일부 영상은 퍼가기가 제한될 수 있습니다.</p>
     `).join('');
   } else {
