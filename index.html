@@ -192,7 +192,8 @@ const TOPICS = [
   {
     id:'space', icon:'🚀', name:'우주 탐험', color:'#3b82f6',
     desc:'태양계 · 별 · 블랙홀',
-    vid:'CoGdsEkWi-E',
+    vid:'Td_A9H69eE8',
+    vid2:'e8YzKyot4Pc',
     qs:[
       {scene:'🌍',sceneText:'버스가 지구를 떠나 우주로 날아갑니다! 창밖으로 아름다운 지구가 점점 작아져요.',
        q:'태양계에서 가장 큰 행성은 무엇인가요?',
@@ -494,7 +495,11 @@ function startTopic(id){
   document.getElementById('intro-desc').textContent=currentTopic.desc;
   const va=document.getElementById('video-area');
   if(currentTopic.vid){
-    va.innerHTML=`<div class="video-box"><iframe src="https://www.youtube.com/embed/${currentTopic.vid}?rel=0" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>`;
+    const vids=[currentTopic.vid, currentTopic.vid2].filter(Boolean);
+    va.innerHTML=vids.map((v,i)=>`
+      <p style="font-size:.78rem;color:var(--text2);margin-bottom:.4rem">📹 영상 ${vids.length>1?i+1:''}</p>
+      <div class="video-box" style="margin-bottom:1rem"><iframe src="https://www.youtube.com/embed/${v}?rel=0" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>
+    `).join('');
   } else {
     va.innerHTML='<div class="no-vid">📹 이 주제는 곧 영상이 추가될 예정이에요!</div>';
   }
