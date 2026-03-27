@@ -79,3 +79,7 @@
   --bg3: #0a9396;  /* 강조 배경 */
 }
 ```
+
+## 개발 정보
+- 로컬 폴더: `C:/Users/USER/science_game`
+- GitHub 레포: `choisuka/science_game`

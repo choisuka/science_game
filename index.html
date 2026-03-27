@@ -170,8 +170,10 @@ canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
 @keyframes ssRot{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
 .ss-planet{position:absolute;top:-14px;left:50%;transform:translateX(-50%);line-height:1;font-size:1.5rem}
 </style>
+<script src="../toro_ai.js"></script>
 </head>
 <body>
+<a href="https://choisuka.github.io/" style="position:fixed;top:12px;left:12px;z-index:999;background:rgba(10,10,26,.88);border:1px solid rgba(168,85,247,.4);color:#c084fc;text-decoration:none;border-radius:20px;padding:6px 15px;font-family:'Jua',sans-serif;font-size:.8rem;backdrop-filter:blur(8px)">🏠 메인 허브</a>
 <canvas id="c"></canvas>
 
 <!-- ── 홈 ── -->
@@ -1137,8 +1139,10 @@ function choose(idx){
   btns[idx].classList.add(idx===q.ans?'correct':'wrong');
   if(idx===q.ans){
     score++;
+    if(typeof toroSay==='function') toroSay('science','correct');
     btns[idx].innerHTML='<span class="choice-letter">✓</span>'+q.choices[idx];
   } else {
+    if(typeof toroSay==='function') toroSay('science','wrong');
     btns[q.ans].classList.add('correct');
   }
   const fb=document.getElementById('fact-box');
@@ -1157,6 +1161,7 @@ function nextQ(){
 
 // ── 결과 ──
 function showResult(){
+  if(typeof toroSay==='function') toroSay('science','complete',{score,total:activeQs.length});
   document.getElementById('quiz').classList.add('hidden');
   document.getElementById('result').classList.remove('hidden');
   done[currentTopic.id]=true;
